@@ -81,14 +81,7 @@
 
     <h1>The shop's <span>almost open.</span></h1>
     <p class="value">Parts &amp; accessories for riders who actually ride. <strong>Rock lights, winches, and pre-winter gear first.</strong></p>
-
-    <!--
-      FORM ACTION PLACEHOLDER: replace REPLACE_WITH_EMAIL_SERVICE_ACTION with the form endpoint
-      from the chosen email service (recommended: Kit, e.g. https://app.kit.com/forms/FORM_ID/subscriptions).
-      Kit expects the email field named "email_address". Swap the checkbox names/values for the
-      tag IDs Kit generates in its HTML embed so each machine choice becomes a subscriber tag.
-    -->
-    <form id="notify" action="REPLACE_WITH_EMAIL_SERVICE_ACTION" method="post">
+    <form id="notify" action="https://app.kit.com/forms/10031809/subscriptions" method="post">
       <label class="sr" for="email">Email address</label>
       <div class="row">
         <input id="email" type="email" name="email_address" placeholder="you@example.com" autocomplete="email" required>
@@ -110,7 +103,7 @@
       <div class="hp" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
 
       <p class="fine">Get first dibs on launch deals. Just the launch email and the occasional good stuff. No spam, unsubscribe anytime.</p>
-      <p class="msg" id="msg" role="status">Preview only: email service not connected yet.</p>
+      <p class="msg" id="msg" role="status"></p>
     </form>
 
     <a class="tt" href="https://www.tiktok.com/@battlegnomerzr" target="_blank" rel="noopener">
@@ -125,12 +118,24 @@
   </footer>
 
 <script>
-  // Until a real endpoint is set, keep the draft from posting anywhere.
   document.getElementById('notify').addEventListener('submit', function(e){
-    if (this.getAttribute('action').indexOf('REPLACE_WITH') === 0) {
-      e.preventDefault();
-      document.getElementById('msg').style.display = 'block';
-    }
+    e.preventDefault();
+    var f=this, msg=document.getElementById('msg'), btn=f.querySelector('button');
+    if (f.website.value) return;
+    var d=new FormData();
+    d.append('email_address', f.email_address.value);
+    var m=[].map.call(f.querySelectorAll('input[name="tags[]"]:checked'), function(c){return c.value;});
+    if (m.length) d.append('fields[machine]', m.join(', '));
+    btn.disabled=true;
+    fetch(f.action,{method:'POST',body:d,headers:{'Accept':'application/json'}})
+      .then(function(r){return r.json();})
+      .then(function(j){
+        if (j.status==='success'){ msg.textContent="You're on the list. We'll let you know when the shop opens."; msg.style.display='block'; f.reset(); }
+        else if (j.url){ window.location.href=j.url; }
+        else { throw 0; }
+      })
+      .catch(function(){ msg.textContent='Something went wrong. Please try again.'; msg.style.display='block'; })
+      .finally(function(){ btn.disabled=false; });
   });
 </script>
 </body>
