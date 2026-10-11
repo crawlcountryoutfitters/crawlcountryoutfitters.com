@@ -75,6 +75,10 @@
   .tts{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 18px;margin-top:22px}
   .tts .tt{margin-top:0}
   .ttl{width:100%;text-align:center;opacity:.85;font-size:.95rem}
+  .done{text-align:center;padding:26px 14px;border:2px solid var(--brass);border-radius:12px;background:rgba(181,151,79,.14);animation:pop .35s ease-out}
+  .done h2{margin:0 0 8px;font-size:1.6rem;color:var(--brass-lt);text-transform:uppercase;letter-spacing:.03em}
+  .done p{margin:0;font-size:1.05rem}
+  @keyframes pop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
 </style>
 </head>
 <body>
@@ -134,12 +138,12 @@
     fetch(f.action,{method:'POST',body:d,headers:{'Accept':'application/json'}})
       .then(function(r){return r.json();})
       .then(function(j){
-        if (j.status==='success'){ msg.textContent="You're on the list. We'll let you know when the shop opens."; msg.style.display='block'; f.reset(); }
+        if (j.status==='success'){ f.innerHTML='<div class="done" role="status"><h2>&#10003; You\'re on the list!</h2><p>We\'ll let you know when the shop opens.</p></div>'; f.scrollIntoView({behavior:'smooth',block:'center'}); return; }
         else if (j.url){ window.location.href=j.url; }
         else { throw 0; }
       })
       .catch(function(){ msg.textContent='Something went wrong. Please try again.'; msg.style.display='block'; })
-      .finally(function(){ btn.disabled=false; });
+      .finally(function(){ if (btn.isConnected) btn.disabled=false; });
   });
 </script>
 </body>
